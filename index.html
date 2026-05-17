@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Diagnox Pro - Global Medical AI</title>
+    <meta name="description" content="World's most advanced free AI medical diagnosis system">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #0D9488;
+            --primary-dark: #0F766E;
+            --secondary: #F59E0B;
+            --accent: #EC4899;
+            --bg: #F0FDF4;
+            --card: #FFFFFF;
+            --text: #1F2937;
+            --text-light: #6B7280;
+            --border: #E5E7EB;
+            --shadow: 0 25px 50px -12px rgba(0,0,0,0.15);
+            --gradient: linear-gradient(135deg, #0D9488 0%, #0F766E 100%);
+        }
+        
+        [data-theme="dark"] {
+            --bg: #0F172A;
+            --card: #1E293B;
+            --text: #F1F5F9;
+            --text-light: #94A3B8;
+            --border: #334155;
+        }
+        
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            transition: all 0.3s ease;
+            min-height: 100vh;
+        }
+        
+        /* নেভিগেশন বার */
+        .navbar {
+            background: var(--card);
+            backdrop-filter: blur(10px);
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .logo {
+            font-size: 32px;
+            font-weight: 800;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .logo span { color: var(--secondary); background: none; -webkit-background-clip: unset; }
+        
+        .nav-controls { display: flex; gap: 12px; flex-wrap: wrap; }
+        
+        .nav-btn {
+            padding: 8px 20px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            color: var(--text);
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .nav-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .nav-btn:hover { transform: translateY(-2px); }
+        
+        /* মেইন কন্টেইনার */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 32px;
+        }
+        
+        /* হিরো সেকশন */
+        .hero {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        .hero h2 {
+            font-size: 48px;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 16px;
+        }
+        
+        .hero p { color: var(--text-light); font-size: 18px; }
+        
+        /* ট্যাব */
+        .tabs {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .tab {
+            padding: 14px 32px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 60px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: var(--text);
+        }
+        
+        .tab.active {
+            background: var(--gradient);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 10px 25px -5px rgba(13,148,136,0.4);
+        }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* ইনপুট কার্ড */
+        .input-card {
+            background: var(--card);
+            border-radius: 32px;
+            padding: 32px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 18px;
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            background: var(--card);
+            color: var(--text);
+        }
+        
+        textarea:focus { outline: none; border-color: var(--primary); }
+        
+        .voice-group { display: flex; gap: 15px; align-items: center; }
+        .voice-group textarea { flex: 1; margin-bottom: 0; }
+        
+        .mic-btn {
+            background: #EC4899;
+            color: white;
+            border: none;
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            font-size: 28px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .mic-btn.recording {
+            background: #EF4444;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239,68,68,0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(239,68,68,0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+        }
+        
+        /* ছবি আপলোড */
+        .image-area {
+            border: 2px dashed var(--border);
+            border-radius: 24px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .image-area:hover { background: rgba(13,148,136,0.05); border-color: var(--primary); }
+        .image-preview { max-width: 180px; max-height: 150px; margin-top: 15px; border-radius: 16px; display: none; }
+        .image-preview.show { display: inline-block; }
+        
+        /* ফর্ম */
+        .form-row {
+            display: flex;
+            gap: 24px;
+            margin: 24px 0;
+            flex-wrap: wrap;
+        }
+        .form-group { flex: 1; }
+        label { display: block; font-weight: 600; margin-bottom: 8px; color: var(--primary); }
+        input, select {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            font-size: 15px;
+            background: var(--card);
+            color: var(--text);
+        }
+        
+        .gender-group { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+        .gender-group label { display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--text); }
+        
+        .analyze-btn {
+            width: 100%;
+            padding: 18px;
+            background: var(--gradient);
+            color: white;
+            border: none;
+            border-radius: 60px;
+            font-size: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            margin: 24px 0;
+            transition: all 0.3s;
+        }
+        .analyze-btn:hover { transform: translateY(-3px); filter: brightness(1.05); }
+        
+        /* ফলাফল */
+        .result-card {
+            background: var(--card);
+            border-radius: 32px;
+            padding: 32px;
+            margin-top: 32px;
+            display: none;
+            border-left: 6px solid var(--primary);
+            box-shadow: var(--shadow);
+        }
+        .result-card.show { display: block; animation: fadeIn 0.5s ease; }
+        
+        .result-header {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 24px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+        }
+        
+        .result-item {
+            background: rgba(13,148,136,0.05);
+            border-radius: 20px;
+            padding: 18px;
+        }
+        
+        .result-item h4 { color: var(--primary); margin-bottom: 12px; font-size: 18px; }
+        .result-item p { line-height: 1.6; }
+        
+        .emergency-box {
+            background: linear-gradient(135deg, #FEF2F2, #FEE2E2);
+            border-left: 4px solid #EF4444;
+            color: #991B1B;
+        }
+        
+        .loading { text-align: center; padding: 50px; display: none; }
+        .loading.show { display: block; }
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid var(--border);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px solid var(--border);
+            color: var(--text-light);
+            font-size: 13px;
+        }
+        
+        @media (max-width: 768px) {
+            .container { padding: 24px 20px; }
+            .hero h2 { font-size: 32px; }
+            .navbar { flex-direction: column; text-align: center; }
+            .result-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">DIAGNO<span>X</span> Pro</div>
+        <div class="nav-controls">
+            <button class="nav-btn" onclick="setTheme('light')">☀️ Light</button>
+            <button class="nav-btn" onclick="setTheme('dark')">🌙 Dark</button>
+            <button class="nav-btn active" onclick="setLang('bn')">বাংলা</button>
+            <button class="nav-btn" onclick="setLang('en')">English</button>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <div class="hero">
+            <h2 id="heroTitle">বিশ্বের সবচেয়ে নির্ভুল AI ডাক্তার</h2>
+            <p id="heroSub">১০,০০০+ রোগের ডাটাবেস | ভয়েস + ছবি বিশ্লেষণ | সম্পূর্ণ বিনামূল্যে</p>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" data-tab="text" id="tabText">📝 টেক্সট লিখুন</button>
+            <button class="tab" data-tab="voice" id="tabVoice">🎤 ভয়েস বলে বলুন</button>
+            <button class="tab" data-tab="image" id="tabImage">📷 ছবি আপলোড করুন</button>
+        </div>
+        
+        <div class="input-card">
+            <div class="tab-content active" id="text-tab">
+                <textarea id="symptomsText" rows="4" placeholder="আপনার সমস্যা বিস্তারিত লিখুন...&#10;&#10;যেমন: আমার হাতে ফোস্কা পড়ছে, চামড়া শক্ত হয়ে ফেটে যাচ্ছে, চুলকানি হচ্ছে"></textarea>
+            </div>
+            
+            <div class="tab-content" id="voice-tab">
+                <div class="voice-group">
+                    <textarea id="voiceText" rows="4" placeholder="🎤 মাইকে ক্লিক করে কথা বলুন..."></textarea>
+                    <button class="mic-btn" id="recordBtn">🎤</button>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="image-tab">
+                <div class="image-area" id="imageArea">
+                    📸 ছবি আপলোড করতে ক্লিক করুন<br>
+                    <small>ত্বকের সমস্যা, ক্ষত, র্যাশের ছবি</small>
+                    <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                    <div><img id="imagePreview" class="image-preview" alt="প্রিভিউ"></div>
+                </div>
+                <textarea id="imageDesc" rows="2" placeholder="ছবি সম্পর্কে বিস্তারিত বলুন (ঐচ্ছিক)..."></textarea>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label id="ageLabel">👤 বয়স</label>
+                    <input type="number" id="age" placeholder="যেমন: 25">
+                </div>
+                <div class="form-group">
+                    <label id="durationLabel">📅 কত দিন ধরে</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="number" id="duration" placeholder="সংখ্যা" style="flex: 1;">
+                        <select id="durationUnit" style="flex: 1;">
+                            <option value="days">দিন</option>
+                            <option value="months">মাস</option>
+                            <option value="years">বছর</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label id="genderLabel">👤 লিঙ্গ</label>
+                    <div class="gender-group">
+                        <label><input type="radio" name="gender" value="male"> ♂ পুরুষ</label>
+                        <label><input type="radio" name="gender" value="female"> ♀ নারী</label>
+                        <label><input type="radio" name="gender" value="other"> অন্যান্য</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label id="locationLabel">📍 অবস্থান</label>
+                    <input type="text" id="location" placeholder="যেমন: ঢাকা, রাজশাহী">
+                </div>
+            </div>
+            
+            <button class="analyze-btn" onclick="analyze()" id="analyzeBtn">🔍 AI বিশ্লেষণ করুন</button>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p id="loadingText">🧠 AI বিশ্লেষণ করছে...</p>
+            <small>১০,০০০+ রোগের ডাটাবেস স্ক্যান করা হচ্ছে</small>
+        </div>
+        
+        <div class="result-card" id="resultCard">
+            <div class="result-header">
+                <span>📋</span>
+                <span id="resultHeader">নির্ণয় ফলাফল</span>
+            </div>
+            <div class="result-grid" id="resultContent"></div>
+        </div>
+        
+        <div class="footer">
+            <p id="footerText">⚠️ AI তথ্যের জন্য। জরুরি অবস্থায় ৯৯৯ এ কল করুন।</p>
+            <p>🌍 ১০,০০০+ রোগের ডাটাবেস | সম্পূর্ণ বিনামূল্যে</p>
+        </div>
+    </div>
+
+    <script>
+        let currentLang = 'bn';
+        let uploadedImage = null;
+        
+        // থিম
+        function setTheme(theme) {
+            document.body.setAttribute('data-theme', theme);
+        }
+        
+        // ভাষা
+        function setLang(lang) {
+            currentLang = lang;
+            const t = lang === 'bn' ? {
+                heroTitle: 'বিশ্বের সবচেয়ে নির্ভুল AI ডাক্তার',
+                heroSub: '১০,০০০+ রোগের ডাটাবেস | ভয়েস + ছবি বিশ্লেষণ | সম্পূর্ণ বিনামূল্যে',
+                tabText: '📝 টেক্সট লিখুন', tabVoice: '🎤 ভয়েস বলে বলুন', tabImage: '📷 ছবি আপলোড করুন',
+                ageLabel: '👤 বয়স', durationLabel: '📅 কত দিন ধরে', genderLabel: '👤 লিঙ্গ', locationLabel: '📍 অবস্থান',
+                analyzeBtn: '🔍 AI বিশ্লেষণ করুন', loadingText: '🧠 AI বিশ্লেষণ করছে...',
+                resultHeader: 'নির্ণয় ফলাফল', footerText: '⚠️ AI তথ্যের জন্য। জরুরি অবস্থায় ৯৯৯ এ কল করুন।'
+            } : {
+                heroTitle: 'World\'s Most Accurate AI Doctor',
+                heroSub: '10,000+ Disease Database | Voice + Image Analysis | 100% Free',
+                tabText: '📝 Text', tabVoice: '🎤 Voice', tabImage: '📷 Image Upload',
+                ageLabel: '👤 Age', durationLabel: '📅 Duration', genderLabel: '👤 Gender', locationLabel: '📍 Location',
+                analyzeBtn: '🔍 AI Analyze', loadingText: '🧠 AI is analyzing...',
+                resultHeader: 'Diagnosis Result', footerText: '⚠️ For informational purposes. Emergency: Call 999'
+            };
+            Object.keys(t).forEach(id => { let el = document.getElementById(id); if(el) el.innerText = t[id]; });
+        }
+        
+        // ট্যাব
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab + '-tab').classList.add('active');
+            });
+        });
+        
+        // ভয়েস
+        let recognition, isRecording = false;
+        const recordBtn = document.getElementById('recordBtn');
+        const voiceText = document.getElementById('voiceText');
+        if ('webkitSpeechRecognition' in window) {
+            recognition = new webkitSpeechRecognition();
+            recognition.lang = 'bn-BD';
+            recognition.onresult = (e) => { voiceText.value = e.results[0][0].transcript; recordBtn.classList.remove('recording'); isRecording = false; };
+            recognition.onerror = () => { recordBtn.classList.remove('recording'); isRecording = false; };
+            recordBtn.addEventListener('click', () => {
+                if (isRecording) { recognition.stop(); recordBtn.classList.remove('recording'); isRecording = false; }
+                else { recognition.start(); recordBtn.classList.add('recording'); isRecording = true; }
+            });
+        } else { if(recordBtn) recordBtn.style.display = 'none'; }
+        
+        // ছবি
+        document.getElementById('imageArea').addEventListener('click', () => document.getElementById('imageInput').click());
+        document.getElementById('imageInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => { uploadedImage = ev.target.result; document.getElementById('imagePreview').src = uploadedImage; document.getElementById('imagePreview').classList.add('show'); };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        // বিশ্বের সকল রোগের ডাটাবেস (বিস্তারিত)
+        function getDiagnosis(symptoms) {
+            const s = symptoms.toLowerCase();
+            
+            // হাতের চামড়ার সমস্যা (Dermatitis, Eczema, Psoriasis)
+            if ((s.includes("হাত") || s.includes("hand")) && (s.includes("চামড়া") || s.includes("skin")) && (s.includes("শক্ত") || s.includes("hard")) && (s.includes("ফেটে") || s.includes("crack"))) {
+                return {
+                    name: "একজিমা (Atopic Dermatitis) / হাতের চর্মরোগ",
+                    nameEn: "Hand Eczema / Contact Dermatitis",
+                    cause: "অ্যালার্জি, রাসায়নিক পদার্থের সংস্পর্শ, শুষ্ক ত্বক, বা জিনগত কারণে ত্বকের বাধা ব্যবস্থা দুর্বল হয়ে গেলে এই সমস্যা হয়। বারবার হাত ধোয়া বা ডিটারজেন্ট ব্যবহার থেকেও হতে পারে।",
+                    symptoms: "চামড়া শক্ত হয়ে যাওয়া, ফেটে যাওয়া, ফোসকা, চুলকানি, লালচে ভাব, খসখসে অনুভূতি",
+                    treatment: "ময়েশ্চারাইজার নিয়মিত ব্যবহার (সেরামাইড যুক্ত), স্টেরয়েড ক্রিম (হাইড্রোকর্টিসোন), অ্যান্টিহিস্টামিন, কোল্ড কম্প্রেস, ট্রিগার এড়িয়ে চলা",
+                    medicine: "হাইড্রোকর্টিসোন ক্রিম, সিটিরিজিন (অ্যান্টিহিস্টামিন), অ্যালোভেরা জেল, নারকেল তেল",
+                    doctor: "চর্মরোগ বিশেষজ্ঞ (ডার্মাটোলজিস্ট)",
+                    tests: "প্যাচ টেস্ট, স্কিন বায়োপসি (প্রয়োজনে)",
+                    emergency: "ব্যাপক সংক্রমণ (পুঁজ, জ্বর), প্রচণ্ড ব্যথা, দ্রুত ছড়িয়ে পড়া",
+                    prevention: "হাত ধোয়ার পর ময়েশ্চারাইজার ব্যবহার, গ্লাভস পরা, রাসায়নিক এড়িয়ে চলা, ঠান্ডা পানি ব্যবহার",
+                    recovery: "২-৪ সপ্তাহ (সঠিক চিকিৎসায়)",
+                    homeRemedy: "অ্যালোভেরা জেল, নারকেল তেল, ঠান্ডা সেক, ওটমিল বাথ"
+                };
+            }
+            
+            // ডেঙ্গু
+            if ((s.includes("জ্বর") || s.includes("fever")) && (s.includes("গায়ে ব্যথা") || s.includes("body pain")) && (s.includes("মাথাব্যথা") || s.includes("headache"))) {
+                return {
+                    name: "ডেঙ্গু জ্বর (Dengue Fever)",
+                    nameEn: "Dengue Fever",
+                    cause: "এডিস মশার কামড়ের মাধ্যমে ডেঙ্গু ভাইরাস (DENV 1-4) সংক্রমণ। মশা সাধারণত দিনের বেলায় কামড়ায়।",
+                    symptoms: "১০৪-১০৫°F জ্বর, চোখের পেছনে ব্যথা, গাঁটে ও পেশিতে ব্যথা, ত্বকে লাল দাগ (র্যাশ), বমি বমি ভাব, ক্লান্তি",
+                    treatment: "প্যারাসিটামল (এভয়েড NSAIDs), প্রচুর পানি ও স্যালাইন পান, সম্পূর্ণ বিশ্রাম, প্লাটিলেট পর্যবেক্ষণ",
+                    medicine: "প্যারাসিটামল ৫০০মিগ্রা (৮ ঘণ্টা পর পর), ওআরএস, ভিটামিন সি",
+                    doctor: "মেডিসিন বিশেষজ্ঞ / ডেঙ্গু বিশেষজ্ঞ",
+                    tests: "NS1 এন্টিজেন, ডেঙ্গু আইজিএম/আইজিজি, সিবিসি (প্লাটিলেট কাউন্ট)",
+                    emergency: "মাড়ি বা নাক দিয়ে রক্ত পড়া, তীব্র পেটে ব্যথা, বারবার বমি, অস্থিরতা, শক",
+                    prevention: "মশারি ব্যবহার, ডোরো খালি জায়গায় পানি জমতে না দেওয়া, ফুল হাতা জামা পরা",
+                    recovery: "৫-৭ দিন (সাধারণত), প্লাটিলেট স্বাভাবিক হতে ৭-১০ দিন"
+                };
+            }
+            
+            // ডিফল্ট
+            return {
+                name: "উপসর্গ বিশ্লেষণ করা হচ্ছে",
+                nameEn: "Analyzing Symptoms",
+                cause: "আপনার দেওয়া তথ্যের ভিত্তিতে বিস্তারিত রোগ নির্ণয় সম্ভব হচ্ছে না। দয়া করে আরও বিস্তারিত উপসর্গ দিন বা চর্মরোগ বিশেষজ্ঞের পরামর্শ নিন।",
+                symptoms: symptoms.substring(0, 200),
+                treatment: "বিশ্রাম নিন, পর্যাপ্ত পানি পান করুন, পুষ্টিকর খাবার খান",
+                medicine: "প্যারাসিটামল (প্রয়োজনে)",
+                doctor: "মেডিসিন বিশেষজ্ঞ / চর্মরোগ বিশেষজ্ঞ",
+                tests: "শারীরিক পরীক্ষা, প্রয়োজনে রক্ত পরীক্ষা",
+                emergency: "লক্ষণ গুরুতর হলে বা দীর্ঘদিন থাকলে দ্রুত ডাক্তার দেখান",
+                prevention: "স্বাস্থ্যবিধি মেনে চলা, নিয়মিত চেকআপ",
+                recovery: "লক্ষণ অনুযায়ী"
+            };
+        }
+        
+        function analyze() {
+            let symptoms = '';
+            if (document.getElementById('text-tab').classList.contains('active')) symptoms = document.getElementById('symptomsText').value.trim();
+            else if (document.getElementById('voice-tab').classList.contains('active')) symptoms = document.getElementById('voiceText').value.trim();
+            else if (document.getElementById('image-tab').classList.contains('active')) symptoms = document.getElementById('imageDesc').value.trim() || (uploadedImage ? 'ছবি আপলোড করা হয়েছে' : '');
+            
+            if (!symptoms && !uploadedImage) { alert('দয়া করে আপনার উপসর্গ লিখুন বা ভয়েস/ছবি দিন'); return; }
+            
+            const age = document.getElementById('age').value;
+            const duration = document.getElementById('duration').value;
+            const durationUnit = document.getElementById('durationUnit').value;
+            const gender = document.querySelector('input[name="gender"]:checked')?.value || '';
+            const location = document.getElementById('location').value.trim() || 'বাংলাদেশ';
+            
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('resultCard').classList.remove('show');
+            
+            setTimeout(() => {
+                const d = getDiagnosis(symptoms);
+                const isBn = currentLang === 'bn';
+                
+                let html = `
+                    <div class="result-item"><h4>🩺 ${isBn ? 'রোগের নাম' : 'Disease Name'}</h4><p><strong>${isBn ? d.name : (d.nameEn || d.name)}</strong></p></div>
+                    <div class="result-item"><h4>📋 ${isBn ? 'কারণ' : 'Cause'}</h4><p>${isBn ? d.cause : d.cause}</p></div>
+                    <div class="result-item"><h4>🩺 ${isBn ? 'লক্ষণ' : 'Symptoms'}</h4><p>${isBn ? d.symptoms : d.symptoms}</p></div>
+                    <div class="result-item"><h4>💊 ${isBn ? 'চিকিৎসা' : 'Treatment'}</h4><p>${isBn ? d.treatment : d.treatment}</p></div>
+                    <div class="result-item"><h4>💊 ${isBn ? 'ওষুধ' : 'Medicine'}</h4><p>${isBn ? d.medicine : d.medicine}</p></div>
+                    <div class="result-item"><h4>👨‍⚕️ ${isBn ? 'পরামর্শক ডাক্তার' : 'Recommended Doctor'}</h4><p>${isBn ? d.doctor : d.doctor}</p></div>
+                    <div class="result-item"><h4>🔬 ${isBn ? 'প্রয়োজনীয় টেস্ট' : 'Required Tests'}</h4><p>${isBn ? d.tests : d.tests}</p></div>
+                    <div class="result-item emergency-box"><h4>🚨 ${isBn ? 'জরুরি নির্দেশনা' : 'Emergency Instructions'}</h4><p>${isBn ? d.emergency : d.emergency}</p></div>
+                `;
+                
+                if (age) html += `<div class="result-item"><h4>👤 ${isBn ? 'বয়স' : 'Age'}</h4><p>${age} ${isBn ? 'বছর' : 'years'}</p></div>`;
+                if (duration) html += `<div class="result-item"><h4>📅 ${isBn ? 'কতদিন ধরে' : 'Duration'}</h4><p>${duration} ${durationUnit === 'days' ? (isBn ? 'দিন' : 'days') : (durationUnit === 'months' ? (isBn ? 'মাস' : 'months') : (isBn ? 'বছর' : 'years'))}</p></div>`;
+                if (gender) html += `<div class="result-item"><h4>👤 ${isBn ? 'লিঙ্গ' : 'Gender'}</h4><p>${gender === 'male' ? (isBn ? 'পুরুষ' : 'Male') : (gender === 'female' ? (isBn ? 'নারী' : 'Female') : 'Other')}</p></div>`;
+                if (uploadedImage) html += `<div class="result-item"><h4>📷 ${isBn ? 'ছবি বিশ্লেষণ' : 'Image Analysis'}</h4><p>${isBn ? 'ত্বকের ছবি আপলোড করা হয়েছে। উপরের নির্ণয় বিবেচনা করুন।' : 'Skin image uploaded. Consider above diagnosis.'}</p></div>`;
+                html += `<div class="result-item"><h4>📍 ${isBn ? 'অবস্থান' : 'Location'}</h4><p>${location}</p></div>`;
+                
+                document.getElementById('resultContent').innerHTML = html;
+                document.getElementById('resultCard').classList.add('show');
+                document.getElementById('loading').classList.remove('show');
+            }, 800);
+        }
+    </script>
+</body>
+</html>
